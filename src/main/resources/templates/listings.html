@@ -115,7 +115,10 @@
             <div class="alert alert-secondary py-2 small" th:if="${error == null}"
                  th:text="'Filters: ' + ${description}">Filters</div>
 
-            <p class="text-muted" th:text="${cards.size()} + ' of ' + ${total} + ' properties match'">0 properties</p>
+            <p class="text-muted"
+               th:text="${matches} + ' of ' + ${total} + ' properties match  (page ' + ${page} + ' of ' + ${totalPages} + ')'">
+                0 properties
+            </p>
 
             <div class="row g-3">
                 <div class="col-md-6 col-xl-4" th:each="c : ${cards}">
@@ -126,7 +129,10 @@
                                 <span class="badge" th:classappend="'text-bg-' + ${c.statusClass}"
                                       th:text="${c.status}">Status</span>
                             </div>
-                            <h5 class="card-title mt-2" th:text="${c.title}">Title</h5>
+                            <h5 class="card-title mt-2">
+                                <a th:href="@{/listings/{id}(id=${c.id})}" class="stretched-link text-decoration-none text-dark"
+                                   th:text="${c.title}">Title</a>
+                            </h5>
                             <p class="text-muted mb-1" th:text="${c.city}">City</p>
                             <p class="fs-5 fw-semibold mb-1" th:text="${c.price}">Price</p>
                             <p class="mb-0 small" th:text="${c.area} + ' | ' + ${c.features}">Area | Features</p>
@@ -138,6 +144,22 @@
             <div class="text-center text-muted py-5" th:if="${cards.isEmpty() and error == null}">
                 No properties match these filters. Try removing one, or switch to "Any filter (OR)".
             </div>
+
+            <!-- ================= PAGE BUTTONS ================= -->
+            <nav th:if="${totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${page == 1} ? 'disabled'">
+                        <a class="page-link" th:href="${'/listings?' + query + 'page=' + (page - 1)}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="n : ${#numbers.sequence(1, totalPages)}"
+                        th:classappend="${n == page} ? 'active'">
+                        <a class="page-link" th:href="${'/listings?' + query + 'page=' + n}" th:text="${n}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${page == totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="${'/listings?' + query + 'page=' + (page + 1)}">Next</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
 
     </div>

@@ -9,6 +9,8 @@ import com.homescout.sort.PriceAscendingSort;
 import com.homescout.sort.PriceDescendingSort;
 import com.homescout.sort.SortStrategy;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class FilterForm {
     private boolean onlyAvailable;
     private boolean matchAny;         // false = ALL criteria (AND), true = ANY criterion (OR)
     private String sort = "priceAsc";
+    private int page = 1;             // which page of results to show
 
     /** Turns the form into your Builder. Blank fields are simply skipped. */
     public FilterCriteria.Builder toCriteria() {
@@ -65,6 +68,37 @@ public class FilterForm {
         };
     }
 
+    /**
+     * Rebuilds the current filters as a web-address query, e.g. "city=Jaipur&types=Villa&".
+     * Every piece ends with "&" so the page number can simply be added after it.
+     */
+    public String toQueryString() {
+        StringBuilder q = new StringBuilder();
+        add(q, "city", city);
+        if (types != null) {
+            for (String t : types) add(q, "types", t);
+        }
+        if (minPrice != null) add(q, "minPrice", String.valueOf(minPrice));
+        if (maxPrice != null) add(q, "maxPrice", String.valueOf(maxPrice));
+        if (minBedrooms != null) add(q, "minBedrooms", String.valueOf(minBedrooms));
+        add(q, "furnishing", furnishing);
+        if (amenities != null) {
+            for (String a : amenities) add(q, "amenities", a);
+        }
+        add(q, "keyword", keyword);
+        if (onlyAvailable) add(q, "onlyAvailable", "true");
+        if (matchAny) add(q, "matchAny", "true");
+        add(q, "sort", sort);
+        return q.toString();
+    }
+
+    private static void add(StringBuilder q, String name, String value) {
+        if (value == null || value.isBlank()) return;
+        q.append(name).append('=')
+                .append(URLEncoder.encode(value.trim(), StandardCharsets.UTF_8))
+                .append('&');
+    }
+
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
     public List<String> getTypes() { return types; }
@@ -87,4 +121,6 @@ public class FilterForm {
     public void setMatchAny(boolean matchAny) { this.matchAny = matchAny; }
     public String getSort() { return sort; }
     public void setSort(String sort) { this.sort = sort; }
+    public int getPage() { return page; }
+    public void setPage(int page) { this.page = page; }
 }

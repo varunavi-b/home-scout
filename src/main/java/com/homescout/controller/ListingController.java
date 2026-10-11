@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @Controller
 public class ListingController {
 
+    private static final int PAGE_SIZE = 6;
+
     private final SearchService searchService;
 
     public ListingController(SearchService searchService) {
@@ -53,8 +55,12 @@ public class ListingController {
 
     @GetMapping("/listings")
     public String listings(@ModelAttribute("form") FilterForm form, Model model) {
-        List<Property> results = List.of();
+        List<Property> pageItems = List.of();
         String description = "";
+        int matches = 0;
+        int totalPages = 1;
+        int currentPage = 1;
+
         try {
             FilterCriteria.Builder builder = form.toCriteria();
             PropertyFilter filter = builder.build();               // a CompositeFilter
@@ -64,7 +70,12 @@ public class ListingController {
                 filter = filter.and(new StatusFilter(ListingStatus.AVAILABLE));   // default method and()
                 description += " | only available listings";
             }
-            results = searchService.search(filter, form.sortStrategy());
+
+            List<Property> results = searchService.search(filter, form.sortStrategy());
+            matches = results.size();
+            totalPages = Math.max(1, (matches + PAGE_SIZE - 1) / PAGE_SIZE);
+            currentPage = Math.min(Math.max(form.getPage(), 1), totalPages);
+            pageItems = searchService.page(results, currentPage, PAGE_SIZE);   // your pagination method
 
         } catch (InvalidPriceException e) {
             model.addAttribute("error",
@@ -73,9 +84,13 @@ public class ListingController {
             model.addAttribute("error", e.getMessage());
         }
 
-        model.addAttribute("cards", results.stream().map(PropertyCard::from).collect(Collectors.toList()));
+        model.addAttribute("cards", pageItems.stream().map(PropertyCard::from).collect(Collectors.toList()));
         model.addAttribute("description", description);
+        model.addAttribute("matches", matches);
         model.addAttribute("total", searchService.search(PropertyFilter.acceptAll()).size());
+        model.addAttribute("page", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("query", form.toQueryString());
         return "listings";
     }
 }
