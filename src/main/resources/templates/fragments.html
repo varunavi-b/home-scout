@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ================= MENU BAR ================= -->
+<nav th:fragment="nav" class="navbar navbar-expand navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">HomeScout</a>
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" th:href="@{/listings}">Listings</a></li>
+            <li class="nav-item" th:if="${currentUser != null and currentUser.buyer}">
+                <a class="nav-link" th:href="@{/favourites}">Favourites</a>
+            </li>
+            <li class="nav-item" th:if="${currentUser != null}">
+                <a class="nav-link" th:href="@{/enquiries}">Enquiries</a>
+            </li>
+            <li class="nav-item" th:if="${currentUser != null and (currentUser.agent or currentUser.admin)}">
+                <a class="nav-link" th:href="@{/manage}">Manage listings</a>
+            </li>
+        </ul>
+        <span class="navbar-text me-3" th:if="${currentUser != null}"
+              th:text="${currentUser.name} + ' (' + ${currentUser.role} + ')'">Name</span>
+        <form th:if="${currentUser != null}" th:action="@{/logout}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-light btn-sm">Log out</button>
+        </form>
+        <a th:if="${currentUser == null}" class="btn btn-outline-light btn-sm" th:href="@{/login}">Log in</a>
+    </div>
+</nav>
+
+<!-- ================= GREEN / RED MESSAGES ================= -->
+<div th:fragment="flash" class="container">
+    <div class="alert alert-success" th:if="${flashMessage != null}" th:text="${flashMessage}">Done</div>
+    <div class="alert alert-danger" th:if="${flashError != null}" th:text="${flashError}">Problem</div>
+</div>
+
+<!-- ================= ONE PROPERTY CARD ================= -->
+<div th:fragment="card(c, saved, next)" class="col-md-6 col-xl-4">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <span class="badge text-bg-secondary" th:text="${c.type}">Type</span>
+                <span class="badge" th:classappend="'text-bg-' + ${c.statusClass}" th:text="${c.status}">Status</span>
+            </div>
+            <h5 class="card-title mt-2">
+                <a th:href="@{/listings/{id}(id=${c.id})}" class="stretched-link text-decoration-none text-dark"
+                   th:text="${c.title}">Title</a>
+            </h5>
+            <p class="text-muted mb-1" th:text="${c.city}">City</p>
+            <p class="fs-5 fw-semibold mb-1" th:text="${c.price}">Price</p>
+            <p class="mb-2 small" th:text="${c.area} + ' | ' + ${c.features}">Area | Features</p>
+
+            <form th:if="${currentUser != null and currentUser.buyer}" method="post"
+                  th:action="@{/favourites/{id}/toggle(id=${c.id})}" style="position: relative; z-index: 2;">
+                <input type="hidden" name="next" th:value="${next}">
+                <button type="submit" class="btn btn-sm"
+                        th:classappend="${saved} ? 'btn-danger' : 'btn-outline-danger'"
+                        th:text="${saved} ? 'Saved - click to remove' : 'Save to favourites'">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= RED TEXT UNDER A FORM FIELD ================= -->
+<div th:fragment="fieldError(name)" class="text-danger small" th:if="${errors[name] != null}"
+     th:text="${errors[name]}">Problem</div>
+
+</body>
+</html>

@@ -8,12 +8,8 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="/">HomeScout</a>
-        <a class="nav-link text-white" href="/listings">Listings</a>
-    </div>
-</nav>
+<div th:replace="~{fragments :: nav}"></div>
+<div th:replace="~{fragments :: flash}"></div>
 
 <div class="container pb-5">
     <a th:href="@{/listings}" class="btn btn-sm btn-outline-secondary mb-3">&larr; Back to listings</a>
@@ -31,6 +27,14 @@
                     <h2 class="mt-2 mb-1" th:text="${p.title}">Title</h2>
                     <p class="text-muted" th:text="${p.address}">Address</p>
                     <p class="display-6 fw-semibold mb-3" th:text="${p.price}">Price</p>
+
+                    <form th:if="${currentUser != null and currentUser.buyer}" method="post"
+                          th:action="@{/favourites/{id}/toggle(id=${p.id})}" class="mb-3">
+                        <input type="hidden" name="next" th:value="'/listings/' + ${p.id}">
+                        <button type="submit" class="btn btn-sm"
+                                th:classappend="${saved} ? 'btn-danger' : 'btn-outline-danger'"
+                                th:text="${saved} ? 'Saved - click to remove' : 'Save to favourites'">Save</button>
+                    </form>
 
                     <table class="table table-sm mb-0">
                         <tbody>
@@ -56,7 +60,7 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm">
+            <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Polymorphism in action</h5>
                     <p class="mb-1">
@@ -71,6 +75,20 @@
                     <p class="small text-muted mb-0" th:text="${p.summary}">Summary line from getDetails()</p>
                 </div>
             </div>
+
+            <div class="card shadow-sm" th:if="${currentUser != null and currentUser.buyer}">
+                <div class="card-body">
+                    <h5 class="card-title">Ask the agent</h5>
+                    <form method="post" th:action="@{/enquiries/{id}(id=${p.id})}">
+                        <textarea name="message" rows="3" class="form-control mb-2"
+                                  placeholder="Is this property still available?" required></textarea>
+                        <button type="submit" class="btn btn-dark btn-sm">Send enquiry</button>
+                    </form>
+                </div>
+            </div>
+            <p class="small text-muted" th:if="${currentUser == null}">
+                <a th:href="@{/login}">Log in</a> as a buyer to save this property or send an enquiry.
+            </p>
         </div>
 
         <!-- ============ RIGHT: loan calculator ============ -->

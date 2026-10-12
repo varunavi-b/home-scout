@@ -2,10 +2,14 @@ package com.homescout.controller;
 
 import com.homescout.exception.InvalidInputException;
 import com.homescout.exception.PropertyNotFoundException;
+import com.homescout.model.Buyer;
 import com.homescout.model.Property;
+import com.homescout.model.User;
 import com.homescout.service.PropertyCatalog;
+import com.homescout.web.CurrentUser;
 import com.homescout.web.EmiResult;
 import com.homescout.web.PropertyDetail;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,9 +22,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class DetailController {
 
     private final PropertyCatalog catalog;
+    private final CurrentUser currentUser;
 
-    public DetailController(PropertyCatalog catalog) {
+    public DetailController(PropertyCatalog catalog, CurrentUser currentUser) {
         this.catalog = catalog;
+        this.currentUser = currentUser;
     }
 
     @GetMapping("/listings/{id}")
@@ -28,6 +34,7 @@ public class DetailController {
                          @RequestParam(defaultValue = "20") int down,
                          @RequestParam(defaultValue = "8.5") double rate,
                          @RequestParam(defaultValue = "20") int years,
+                         HttpSession session,
                          Model model) {
         Property property;
         try {
@@ -36,7 +43,14 @@ public class DetailController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
 
+        boolean saved = false;
+        User user = currentUser.from(session);
+        if (user instanceof Buyer buyer) {
+            saved = buyer.getFavourites().contains(property);     // uses Property.equals()
+        }
+
         model.addAttribute("p", PropertyDetail.from(property));
+        model.addAttribute("saved", saved);
         model.addAttribute("down", down);
         model.addAttribute("rate", rate);
         model.addAttribute("years", years);
