@@ -26,6 +26,8 @@ public class AccessInterceptor implements HandlerInterceptor {
             allowed = user.isBuyer();
         } else if (path.startsWith("/manage")) {
             allowed = user.isAgent() || user.isAdmin();
+        } else if (path.startsWith("/admin")) {
+            allowed = user.isAdmin();
         }
 
         if (!allowed) {                             // logged in, but the wrong role

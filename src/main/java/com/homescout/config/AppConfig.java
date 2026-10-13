@@ -1,10 +1,13 @@
 package com.homescout.config;
 
+import com.homescout.exception.DataFileException;
 import com.homescout.model.Admin;
 import com.homescout.model.Agent;
 import com.homescout.model.Buyer;
+import com.homescout.model.Property;
 import com.homescout.model.User;
 import com.homescout.service.AuthService;
+import com.homescout.service.DataStore;
 import com.homescout.service.EnquiryService;
 import com.homescout.service.PropertyCatalog;
 import com.homescout.service.SearchService;
@@ -13,6 +16,7 @@ import com.homescout.util.SampleData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.nio.file.Paths;
 import java.util.List;
 
 @Configuration
@@ -45,11 +49,37 @@ public class AppConfig {
     }
 
     @Bean
-    public PropertyCatalog propertyCatalog(UserService users) {
+    public DataStore dataStore() {
+        return new DataStore(Paths.get("data"));          // the "data" folder in your project
+    }
+
+    @Bean
+    public PropertyCatalog propertyCatalog(UserService users, DataStore store) {
         PropertyCatalog catalog = PropertyCatalog.getInstance();      // your Singleton
         if (catalog.size() == 0) {
             List<Agent> agents = users.getAllOfType(Agent.class);     // your generic method
-            SampleData.load(catalog, agents.get(0), agents.get(1));
+            boolean restored = false;
+
+            if (store.hasSavedProperties()) {
+                try {
+                    List<Property> saved = store.loadProperties();
+                    catalog.replaceAll(saved);
+                    for (Property p : saved) {                         // give every agent back the listings they own
+                        for (Agent agent : agents) {
+                            if (agent.getId() == p.getAgentId()) {
+                                agent.addListing(p);
+                            }
+                        }
+                    }
+                    restored = true;
+                    System.out.println("Loaded " + saved.size() + " saved listings.");
+                } catch (DataFileException e) {
+                    System.out.println("Warning: " + e.getMessage() + " - starting with sample data.");
+                }
+            }
+            if (!restored) {
+                SampleData.load(catalog, agents.get(0), agents.get(1));
+            }
         }
         return catalog;
     }

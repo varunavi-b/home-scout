@@ -17,6 +17,9 @@
             <li class="nav-item" th:if="${currentUser != null and (currentUser.agent or currentUser.admin)}">
                 <a class="nav-link" th:href="@{/manage}">Manage listings</a>
             </li>
+            <li class="nav-item" th:if="${currentUser != null and currentUser.admin}">
+                <a class="nav-link" th:href="@{/admin/stats}">Statistics</a>
+            </li>
         </ul>
         <span class="navbar-text me-3" th:if="${currentUser != null}"
               th:text="${currentUser.name} + ' (' + ${currentUser.role} + ')'">Name</span>
