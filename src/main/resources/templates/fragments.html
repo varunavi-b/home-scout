@@ -2,33 +2,37 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<!-- ================= MENU BAR ================= -->
-<nav th:fragment="nav" class="navbar navbar-expand navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" th:href="@{/}">HomeScout</a>
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" th:href="@{/listings}">Listings</a></li>
-            <li class="nav-item" th:if="${currentUser != null and currentUser.buyer}">
-                <a class="nav-link" th:href="@{/favourites}">Favourites</a>
-            </li>
-            <li class="nav-item" th:if="${currentUser != null}">
-                <a class="nav-link" th:href="@{/enquiries}">Enquiries</a>
-            </li>
-            <li class="nav-item" th:if="${currentUser != null and (currentUser.agent or currentUser.admin)}">
-                <a class="nav-link" th:href="@{/manage}">Manage listings</a>
-            </li>
-            <li class="nav-item" th:if="${currentUser != null and currentUser.admin}">
-                <a class="nav-link" th:href="@{/admin/stats}">Statistics</a>
-            </li>
-        </ul>
-        <span class="navbar-text me-3" th:if="${currentUser != null}"
-              th:text="${currentUser.name} + ' (' + ${currentUser.role} + ')'">Name</span>
-        <form th:if="${currentUser != null}" th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-light btn-sm">Log out</button>
-        </form>
-        <a th:if="${currentUser == null}" class="btn btn-outline-light btn-sm" th:href="@{/login}">Log in</a>
-    </div>
-</nav>
+<!-- ================= MENU BAR (also loads our own stylesheet) ================= -->
+<th:block th:fragment="nav">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <nav class="navbar navbar-expand navbar-dark bg-dark mb-4">
+        <div class="container flex-wrap">
+            <a class="navbar-brand" th:href="@{/}">HomeScout</a>
+            <ul class="navbar-nav me-auto flex-wrap">
+                <li class="nav-item"><a class="nav-link" th:href="@{/listings}">Listings</a></li>
+                <li class="nav-item" th:if="${currentUser != null and currentUser.buyer}">
+                    <a class="nav-link" th:href="@{/favourites}">Favourites</a>
+                </li>
+                <li class="nav-item" th:if="${currentUser != null}">
+                    <a class="nav-link" th:href="@{/enquiries}">Enquiries</a>
+                </li>
+                <li class="nav-item" th:if="${currentUser != null and (currentUser.agent or currentUser.admin)}">
+                    <a class="nav-link" th:href="@{/manage}">Manage listings</a>
+                </li>
+                <li class="nav-item" th:if="${currentUser != null and currentUser.admin}">
+                    <a class="nav-link" th:href="@{/admin/stats}">Statistics</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/concepts}">OOP concepts</a></li>
+            </ul>
+            <span class="navbar-text me-3" th:if="${currentUser != null}"
+                  th:text="${currentUser.name} + ' (' + ${currentUser.role} + ')'">Name</span>
+            <form th:if="${currentUser != null}" th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-light btn-sm">Log out</button>
+            </form>
+            <a th:if="${currentUser == null}" class="btn btn-outline-light btn-sm" th:href="@{/login}">Log in</a>
+        </div>
+    </nav>
+</th:block>
 
 <!-- ================= GREEN / RED MESSAGES ================= -->
 <div th:fragment="flash" class="container">
