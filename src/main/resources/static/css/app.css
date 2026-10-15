@@ -4,10 +4,19 @@
     --ink: #1f2937;
 }
 
+
 body {
-    background: #f3f4f6;
-    color: var(--ink);
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #ffffff; /* Changes text to bright white so it pops */
+    height: 100vh;
+    margin: 0;
 }
+
 
 /* a small footer on every page, with no extra HTML needed */
 body::after {
@@ -50,4 +59,8 @@ a { color: var(--brand); }
 .form-control:focus, .form-select:focus {
     border-color: var(--brand);
     box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.2);
+}
+/* Ensure text inside cards and filter forms remains dark and visible */
+.card, .card label, .card span, .form-check-label, .filter-form label {
+    color: var(--ink) !important;
 }
